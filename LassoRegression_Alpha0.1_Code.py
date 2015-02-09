@@ -1,8 +1,3 @@
-
-# coding: utf-8
-
-# In[ ]:
-
 import csv
 import gzip
 import numpy as np
@@ -15,6 +10,8 @@ pred_filename  = 'example_mean.csv'
 # Load the training file.
 train_data = []
 train_features = []
+target = []
+
 with gzip.open(train_filename, 'r') as train_fh:
 
     # Parse it as a CSV file.
@@ -33,10 +30,13 @@ with gzip.open(train_filename, 'r') as train_fh:
                             'features': features,
                             'gap':      gap })
         
+        # Get a features matrix
         train_features.append(features)
+
+        # Create the target vector
+        target.append(gap)
         
-target = np.array([datum['gap'] for datum in train_data])
-        
+# Fit to a linear model
 clf = linear_model.Lasso(alpha = .1)
 clf.fit(train_features, target)
 
@@ -79,9 +79,6 @@ with open(pred_filename, 'w') as pred_fh:
     for datum in test_data:
         pred_csv.writerow([datum['id'], the_predictions[counter]])
         counter = counter + 1
-
-
-# In[ ]:
 
 
 
