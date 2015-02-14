@@ -96,7 +96,7 @@ To make our best predictions on the actual test data, we needed to use a random 
 
 
 
-\section{Neural Networks}
+\section{Artificial Neural Network Regression}
 
 \subsection{Background}
 
@@ -113,17 +113,17 @@ for machine learning.  There is a neural network net, composed of a set of input
    fires again according to the activation function to the third layer.  Finally, 
    the output layer will have the output of the neural network; for a regression 
    problem like this, there is one output node which will output a value, a 
-   weighted linear combination of the nodes that fired in the previous layer.
-(source: http://www.willamette.edu/~gorr/classes/cs449/intro.html, also cite the textbook)
+   weighted linear combination of the nodes that fired in the previous layer. [1]
 
-Most of the work done to optimize neural networks have come in the form of
- learning algorithms to optimize the weights between nodes.  
- (source: http://neuralnetworksanddeeplearning.com/chap2.html)
+Most of the work done in artificial neural networks research
+ involves the creation of
+ learning algorithms to optimize the weights between nodes.  [3]
+ 
 
 \subsection{Setting up an ANN}
 
 We decided to use the Torch7 machine learning library to create and 
-train an artificial neural network (http://torch.ch/).  Installing and
+train an artificial neural network [2].  Installing and
  setting up dependencies took a rather long time.  Ultimately, we were
   able to run Torch7 on Ubuntu 14.04 LTS on a 4.0GHz Intel i7 processor
    and a Nvidia GeForce GTX 750 Ti graphics card with GPU acceleration. 
@@ -134,17 +134,16 @@ train an artificial neural network (http://torch.ch/).  Installing and
 
 \subsection{Training algorithm}
 The training algorithm is where the optimization of the neural network
- occurred and the “heart” of the machine learning.  We used implemented 
+ occurred and the ``heart'' of the machine learning.  We implemented 
  a simple backpropagation algorithm that involved gradient descent.  In 
  preparation for this, we used a tanh activation function for all of the
   nodes (to use gradient descent, the activation function has to be differentiable). 
    The backpropagation algorithm sends error signals backwards through the neural
     network to update the weights to minimize the error loss function, which we
      defined as the mean squared error.  Minimizing the mean squared error is
-      the same as minimizing our root mean squared error.
-(http://torch.cogbits.com/wiki/doku.php)
+      the same as minimizing our root mean squared error. [4]
 
-\subsection{ANN Design}
+\subsection{Desiging our ANN}
 Initially, we designed the neural network with 256 input nodes
  (one for each element in the feature vector), and 1 output node
   (for the output).  We trained it for 100 iterations on the first 
@@ -156,7 +155,7 @@ Initially, we designed the neural network with 256 input nodes
      nonlinear operation (tanh) and then returns an answer.  To do better
       learning, we would have to add a hidden layer to the ANN.
 
-Now, a large problem was finding a good structure for the neural network. 
+Now, the problem at hand was finding a good structure for the neural network. 
  We experimented with 
 32, 64, 128, 256, 512, and 1024 hidden layers, using 3-fold cross
 validation for a total set of 30,000 random rows (same rows for each test,
@@ -169,19 +168,68 @@ a learning rate of 0.01:
   32 & 0.29403  \\
   64 & 0.29489  \\
   128 & 0.29319 \\
-  256 & 1 \\
-  512 & 1 \\
-  1024 & 1 \\
+  256 & 0.29314 \\
+  512 & 0.29296 \\
+  1024 & 0.29342 \\
 \end{tabular}
 
-Here are some plots of our runs.
+Unfortunately, we were unable to differentiate between 
+the performance of different numbers of hidden nodes because 
+of how close the RMSE values are to each other.  In general,
+there should be a balance between too few nodes (underfitting)
+and too many nodes (overfitting), but we did not notice
+either underfitting or overfitting.  However, in an experiment
+on a smaller set of the data, a 3-fold cross-validation on a total of
+300 randomly chosen elements, we found a lot of overfitting as the number of
+nodes increased.
+
+To better understand how the training algorithm performed,
+we can look at a graph of the internal root mean squared error
+of the model during training at each iteration of the stochastic
+gradient descent algorithm.  In the end, we worked mostly with
+the neural network with 128 hidden nodes for speed purposes.
+
+\includegraphics[scale=0.5]{run128.png}
+
+The main bottleneck that we faced was time: at 200 iterations, it seems
+as if the curve, the internal RMSE, levels off and does not
+decrease very much.  After around 600 iterations (we did not
+record the internal data for this, only the end result),
+the internal RMSE was 0.27711, showing diminishing marginal
+returns.  The interal RMSE is a lower
+bound on the performance of any model on new data, so we chose
+not to proceed with the neural network model in the interest
+of time and efficiency.
 
 \subsection{Results and conclusion for ANNs}
 With our neural network structure, we were unable to see any large 
-improvements over the simple ridge linear regression method.  We suspect
- that this may be a quality of the data - our neural networks seemed to 
- have a hard time differentiating between values.  Perhaps we should have gone
-  into RDKit and extract more defining features that pertain more to the the 
-  HOMO-LUMO energy gap.  
+improvements over the simple ridge linear regression method.  
+We suspect
+ that this may have been due to the quality of the data 
+ - our neural networks seemed to 
+ have a difficult time predicting values even with a good training
+ algorithm.  Perhaps the features of the smiles string do not correlate
+ very much with the energy gap.  If we had more time, we would have
+ went into RDKit to extract more relevant features that may pertain more
+ to the energy gap and train the neural network on these larger
+ vectors.  Determining which elements of the features vector
+ to keep and which not to keep would also help in a neural networks approach.
+
+\section{References and Citations}
+
+Note that some of these citations are used in-text while
+others are reference materials, as noted.
+
+\subsection{Citations}
+
+\begin{description}
+  \item{[1]} http://www.willamette.edu/~gorr/classes/cs449/intro.html
+  \item{[2]} http://torch.ch/
+  \item{[3]} http://neuralnetworksanddeeplearning.com/chap2.html
+  \item{[4]} http://torch.cogbits.com/wiki/doku.php
+
+\end{description}
+
+\subsection{General References}
 
 \end{document}
