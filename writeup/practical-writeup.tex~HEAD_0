@@ -1,0 +1,136 @@
+\title{CS 181 Practical Writeup}
+\author{
+        Kevin C. Ma, Robert Chen, Richard Zou
+}
+\date{\today}
+
+\documentclass{article}
+\usepackage{amssymb} %general math
+\usepackage{mathtools} %text in formulae and more advanced stuff
+\usepackage{verbatim} %multiline comments with \begin{comment}
+\usepackage{geometry}
+\geometry{%
+  letterpaper,
+  lmargin=2cm,
+  rmargin=2cm,
+  tmargin=2cm,
+  bmargin=2cm,
+  footskip=12pt,
+  headheight=12pt}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
+%\cfoot{Page \thepage\ of \totalpages}
+
+
+% Creates the square box used to end a solution.
+\def\squarebox#1{\hbox to #1{\hfill\vbox to #1{\vfill}}}
+\def\qed{\hspace*{\fill}
+        \vbox{\hrule\hbox{\vrule\squarebox{.667em}\vrule}\hrule}}
+\newenvironment{solution}{\begin{trivlist}\item[]{\bf Solution}}
+                      {\qed \end{trivlist}}
+\newcommand{\set}[1] { \{#1\} }
+\newcommand{\whitespace}{ \vspace{\baselineskip} }
+\newcommand{\inner}[1]{\left< #1\right>}
+\newcommand{\norm}[1]{\| #1 \|}
+\newcommand{\ans}[1]{\Aboxed{#1}}
+
+\usepackage{mathtools}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+
+\begin{document}
+\maketitle
+
+
+\section{Neural Networks}
+
+\subsection{Background}
+
+Artificial neural networks (ANN) are a set of biologically inspired algorithms
+for machine learning.  There is a neural network net, composed of a set of input
+ nodes in the first layer, hidden nodes (in zero or more hidden layers), and output
+  notes in the last layer. All the nodes in one layer are connected to all the nodes 
+  in the next layer.  A neural network takes in a vector as input (each node takes an 
+  element of the vector).  Then, the nodes “fire” based on an activation function: 
+  for a non-linear activation function such as the sigmoid or hyperbolic tangent, 
+  each node will send a signal to its connections based on how large or small the 
+  input to them was.  Each node in the second layer collects all of the inputs from 
+  the previous layer and weighs them linearly by weights on the connections, and then
+   fires again according to the activation function to the third layer.  Finally, 
+   the output layer will have the output of the neural network; for a regression 
+   problem like this, there is one output node which will output a value, a 
+   weighted linear combination of the nodes that fired in the previous layer.
+(source: http://www.willamette.edu/~gorr/classes/cs449/intro.html, also cite the textbook)
+
+Most of the work done to optimize neural networks have come in the form of
+ learning algorithms to optimize the weights between nodes.  
+ (source: http://neuralnetworksanddeeplearning.com/chap2.html)
+
+\subsection{Setting up an ANN}
+
+We decided to use the Torch7 machine learning library to create and 
+train an artificial neural network (http://torch.ch/).  Installing and
+ setting up dependencies took a rather long time (10 hours).  Ultimately, we were
+  able to run Torch7 on Ubuntu 14.04 LTS on a 4.0GHz Intel i7 processor
+   and a Nvidia GeForce GTX 750 Ti graphics card with GPU acceleration. 
+    Training a neural network on the GPU rather than the CPU resulted in
+     five to twenty time speedups, worth the initial time investment
+      in setting up the dependencies.
+
+
+\subsection{Training algorithm}
+The training algorithm is where the optimization of the neural network
+ occurred and the “heart” of the machine learning.  We used implemented 
+ a simple backpropagation algorithm that involved stochastic
+ gradient descent.  In 
+ preparation for this, we used a tanh activation function for all of the
+  nodes (to use gradient descent, the activation function has to be differentiable). 
+   The backpropagation algorithm sends error signals backwards through the neural
+    network to update the weights to minimize the error loss function, which we
+     defined as the mean squared error.  Minimizing the mean squared error is
+      the same as minimizing our root mean squared error.
+(http://torch.cogbits.com/wiki/doku.php)
+
+\subsection{ANN Design}
+Initially, we designed the neural network with 256 input nodes
+ (one for each element in the feature vector), and 1 output node
+  (for the output).  We trained it for 100 iterations on the first 
+  10,000 rows of the data, and then tested its performance on the 
+  second 10,000 rows of the data.  This resulted in a RMSE error of
+   around 0.299.  Without a hidden layer, the neural network almost
+    does the same thing as linear regression: it takes the feature
+     vector, performs some linear operation to it, then performs a 
+     nonlinear operation (tanh) and then returns an answer.  To do better
+      learning, we would have to add a hidden layer to the ANN.
+
+Now, a large problem was finding a good structure for the neural network. 
+ We experimented with 
+32, 64, 128, 256, 512, and 1024 hidden layers, using 3-fold cross
+validation for a total set of 30,000 random rows (same rows for each test).
+Below is a table of the RMSE after training for 200 iterations and
+a learning rate of 0.01:
+
+\begin{tabular}{ c | c }
+  Nodes in hidden layer & Average RMSE of the model  \\
+  32 & 5  \\
+  64 & 8  \\
+  128 & 1 \\
+  256 & 1 \\
+  512 & 1 \\
+  1024 & 1 \\
+\end{tabular}
+
+Here are some plots of our runs.
+
+\subsection{Results and conclusion for ANNs}
+With our neural network structure, we were unable to see any large 
+improvements over the simple ridge linear regression method.  We suspect
+ that this may be a quality of the data - our neural networks seemed to 
+ have a hard time differentiating between values.  Perhaps we should have gone
+  into RDKit and extract more defining features that pertain more to the the 
+  HOMO-LUMO energy gap.  
+
+
+\end{document}
