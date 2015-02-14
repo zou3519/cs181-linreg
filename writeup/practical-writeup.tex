@@ -45,23 +45,17 @@
 
 \section{Introduction}
 
-We experimented with [blah blah techniques blah blah and overall concluded at a very high level that blah was generally what was more successful.]
-
-\subsection{Computing Approaches}
-
-[Talk about cloud computing stuff? If not CHANGE BEGINNING OF NEXT PARAGRAPH.]
-
-However, we did not begin using this computing mechanism until late in our project (in fact even after the Kaggle competition ended). In order evaluate techniques despite the limit of 4 Kaggle submissions per day, and more importantly, get feedback on ideas and approaches within a reasonable time frame,  we split up the training data into more manageable chunks. We thus did the majority of our analysis on a training set consisting of the first 50,000 molecules and used subsequent sets of 50,000 molecules as validation datasets and test sets. In comparison to tests that took a minute or two each, training regressors on the full training set took over 10 hours in some cases.
+Our approach to predicting the HOMO-LUMO gap employed linear regression methods, random forests, and neural networks. We found that a random forest regressor performed moderately well relative to the class and that there were opportunities for further improvement of the basic model by increasing the number of predictors from RDkit's fingerprinting feature [5]. In all of these models, due to time and computational power constraints, we trained on data from the first 50,000 molecules and used subsequent sets of 50,000 molecules as validation sets.
 
 \section{Basic Regression Techniques}
 
 \subsection{Initial Runs}
 
-We first utilized the benchmark techniques: simple linear regression and ridge regression with the default coefficient weight for the penalty term (call it alpha) of 0.5. When running these on our 50,000 molecule sample sets, we obtained RMSE values of .29820072 and .29818009, respectively. We also ran these regression techniques in the Kaggle competition, and based on those results, we concluded that the 50,000 molecule sample yielded accuracy scores sufficiently similar to the actual test data, and differences in performance of separate techniques was especially sufficiently reflective of differences in test data performance between those techniques.
+We first utilized the benchmark techniques: simple linear regression and ridge regression with the default coefficient weight for the penalty term ($\alpha$) of 0.5. When running these on our 50,000 molecule sample sets, we obtained RMSE values of .29820072 and .29818009, respectively. We also ran these regression techniques in the Kaggle competition, and based on those results, we concluded that the 50,000 molecule sample yielded accuracy scores sufficiently similar to the actual test data, and differences in performance of separate techniques was especially sufficiently reflective of differences in test data performance between those techniques.
 
 \subsection{Ridge Regression Cross Validation}
 
-We used a standard cross validation approach, as has been discussed in section, in order to determine an optimal alpha value for ridge regression. To do this, we utilized the scikit-learn RidgeCV function. This yielded an alpha value of 1.175; however, the performance with this alpha value was relatively negligible in comparison to the default ridge regression, reflecting inherent complexity in the data that could not be modeled using the ridge regression technique.
+We used a standard cross validation approach, as has been discussed in section, in order to determine an optimal alpha value for ridge regression. To do this, we utilized the scikit-learn RidgeCV function [6]. This yielded an alpha value of 1.175; however, the performance with this alpha value was relatively negligible in comparison to the default ridge regression, reflecting inherent complexity in the data that could not be modeled using the ridge regression technique.
 
 \subsection{Lasso Regression and Elastic Net Regularization}
 
@@ -73,14 +67,14 @@ We found that the model, under cross validation of the alpha and rho parameters 
 
 \subsection{Background}
 
-Next we consider the random forest regression method, which is an ensemble algorithm that is quite efficient yet often quite accurate for large data sets. It employs a decision tree classification idea and averages performance over numerous decision trees. Each decision tree uses a random sample of the training data (drawn with replacement). To complete the classification within each tree, one completes a series of binary splits which divides the data subsequently into groups. For each split, a random sample of features is compared. For each feature, one optimizes the residual sum of squares; that is, one picks the value that creates two groups (above [A] and below [B] the value) such that the expression $\sum_A (y_A - \mu _A)^2 + \sum_B (y_B - \mu _B)^2$ is minimized, where $\mu _A, \mu _B$ are the respective means of the two groups. Then, take the minimum of this number over all the features to use as the split. At the end, the value assigned to each leaf node group is the average of the target values for the members of that group. Given the regressor, categorizing test data just amounts to following each tree down through the splits, and then averaging the values obtained from the resulting leaf node group of each decision tree.
+Next we consider the random forest regression method, which is an ensemble algorithm that is quite efficient yet often quite accurate for large data sets [7]. It employs a decision tree classification idea and averages performance over numerous decision trees. Each decision tree uses a random sample of the training data (drawn with replacement). To complete the classification within each tree, one completes a series of binary splits which divides the data subsequently into groups. For each split, a random sample of features is compared. For each feature, one optimizes the residual sum of squares; that is, one picks the value that creates two groups (above [A] and below [B] the value) such that the expression $\sum_A (y_A - \mu _A)^2 + \sum_B (y_B - \mu _B)^2$ is minimized, where $\mu _A, \mu _B$ are the respective means of the two groups. Then, take the minimum of this number over all the features to use as the split. At the end, the value assigned to each leaf node group is the average of the target values for the members of that group. Given the regressor, categorizing test data just amounts to following each tree down through the splits, and then averaging the values obtained from the resulting leaf node group of each decision tree. [8] [9]
 
 One parameter to set through testing is the number of features that are randomly chosen to be compared at each split. Also, the greater the depth of the trees utilized before stopping the procedure, the smaller the bias; however, this requires a much higher number of trees (another parameter) in order to maintain relatively low variance. Higher numbers of trees will generate more accurate predictions, but with diminishing returns.
 
 
 \subsection{Model Selection}
 
-Upon investigating different max number of features to select from at each split, we found there to be very small difference between using the square root of the number of features, the base-2 log of the number of features, and our scikit-learn function RandomForestRegressor's default setting of using all features. We ultimately worked with the square root, which gave the (marginally) best RMSE error in our tests. We changed the default setting of using 10 decision trees in the random forest to using 300 trees, after our tests revealed diminishing returns to increasing the number of trees at around 300, but somewhat significant improvements up until that point. See graph in Figure 1.
+Upon investigating different max number of features to select from at each split, we found there to be very small difference between using the square root of the number of features, the base-2 log of the number of features, and our scikit-learn function RandomForestRegressor's default setting of using all features. We ultimately worked with the square root, which gave the (marginally) best RMSE error in our tests. We changed the default setting of using 10 decision trees in the random forest to using 300 trees, after our tests revealed diminishing returns to increasing the number of trees at around 300, but somewhat significant improvements up until that point. See graph in Figure 1 (on the last page of the document).
 
 \subsection{Error Analysis and Post-Prediction Adjustments}
 
@@ -189,7 +183,7 @@ of the model during training at each iteration of the stochastic
 gradient descent algorithm.  In the end, we worked mostly with
 the neural network with 128 hidden nodes for speed purposes.
 
-\includegraphics[scale=0.5]{run128.png}
+% \includegraphics[scale=0.5]{run128.png}
 
 The main bottleneck that we faced was time: at 200 iterations, it seems
 as if the curve, the internal RMSE, levels off and does not
@@ -217,19 +211,17 @@ We suspect
 
 \section{References and Citations}
 
-Note that some of these citations are used in-text while
-others are reference materials, as noted.
-
-\subsection{Citations}
 
 \begin{description}
   \item{[1]} http://www.willamette.edu/~gorr/classes/cs449/intro.html
   \item{[2]} http://torch.ch/
   \item{[3]} http://neuralnetworksanddeeplearning.com/chap2.html
   \item{[4]} http://torch.cogbits.com/wiki/doku.php
-
+  \item{[5]} http://www.rdkit.org/docs/GettingStartedInPython.html
+  \item{[6]} http://scikit-learn.org/stable/modules/generated/sklearn.linear\_model.RidgeCV.html
+  \item{[7]} http://scikit-learn.org/stable/modules/ensemble.html
+   \item{[8]} http://www.bios.unc.edu/~dzeng/BIOS740/randomforest.pdf
+    \item{[9]} http://www.math.usu.edu/adele/randomforests/uofu2013.pdf
 \end{description}
-
-\subsection{General References}
 
 \end{document}
